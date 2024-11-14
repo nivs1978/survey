@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey</title>
+    <!-- Enable full-screen mode on Apple devices -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Set the icon for the home screen -->
+    <link rel="apple-touch-icon" href="icon-172x172.png">
+    
+    <!-- Optionally, you can specify different icons for different resolutions -->
+    <link rel="apple-touch-icon" sizes="76x76" href="icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180x180.png">	
+
+	<!-- Reference the manifest file for Android and other devices -->
+	<link rel="manifest" href="/manifest.json">
+
+	<!-- Set a theme color for the browser's address bar (Android only) -->
+	<meta name="theme-color" content="#000000">
+
+	<style type="text/css">
+        body, html {
+            border: none;
+            padding: 0;
+            margin: 0;
+        }
+        .headline {
+            width: 100vw;
+            font-size: 5vw;
+        }
+        .container_rating {
+            display: flex;
+            justify-content: space-between;
+            width: 100vw;
+        }
+        .placeholder_rating {
+            width: 9vw;
+        }
+        .image_rating {
+            width: 9vw;
+        }
+
+		.container_relation {
+            display: flex;
+            justify-content: space-between;
+            width: 100vw;
+        }
+        .placeholder_relation {
+            width: 9vw;
+        }
+        .image_relation {
+            width: 9vw;
+        }
+		.image-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			width: 9vw;
+			font-size: 5vw;
+		}
+    </style>
+  </head>
+  <body>
+	<div id="question1">
+		<div class="headline">Sp. 1 af 2: Hvad synes du om forestillingen?<br /><br /></div>
+		<div class="container_rating">
+			<div class="placeholder_rating"></div>
+			<img class="image_rating" src="excellent.png" alt="Excellent" onclick="setRating(5)" />
+			<div class="placeholder_rating"></div>
+			<img class="image_rating" src="good.png" alt="Good" onclick="setRating(4)" />
+			<div class="placeholder_rating"></div>
+			<img class="image_rating" src="medium.png" alt="Medium" onclick="setRating(3)" />
+			<div class="placeholder_rating"></div>
+			<img class="image_rating" src="poor.png" alt="Poor" onclick="setRating(2)" />
+			<div class="placeholder_rating"></div>
+			<img class="image_rating" src="very_bad.png" alt="Very bad" onclick="setRating(1)" />
+			<div class="placeholder_rating"></div>
+		</div>
+	</div>
+	<div id="question2">
+	<div class="headline"><br /><br />Sp. 2 af 2: Har du en relation til teateret?<br /><br /></div>
+	<div class="container_relation">
+        <div class="placeholder_relation"></div>
+		<div class="image-container">
+        	<img class="image_relation" src="family.png" alt="Family" onclick="setRelation('family')" /><div>Familie</div>
+		</div>
+        <div class="placeholder_relation"></div>
+		<div class="image-container">
+			<img class="image_relation" src="voulenteer.png" alt="Voulenteer" onclick="setRelation('voulenteer')" /><div>Frivilig</div>
+		</div>
+        <div class="placeholder_relation"></div>
+		<div class="image-container">
+			<img class="image_relation" src="other.png" alt="Other" onclick="setRelation('other')" /><div>Ingen/Andet</div>
+		</div>
+        <div class="placeholder_relation"></div>
+    </div>
+	</div>
+	<script type="text/javascript">
+		var set_rating = 0;
+		question2.style.opacity = 0.3;
+        function setRating(rating) {
+			set_rating = rating;
+            console.log("Rating set to: " + set_rating);
+            question2.style.opacity = 1;
+        }
+
+		function setRelation(relation) {
+			if (set_rating==0)
+			{
+				return; // Do not allow to set relation if rating is not set
+			}
+			console.log("Relation set to: " + relation);
+
+			fetch('data.php?rating=' + set_rating + '&relation=' + relation)
+			.then(response => response.json())
+			.then(data => {
+				if (data.success) {
+					console.log(data.message);
+					thankYou();
+				} else {
+					console.error(data.message);
+				}
+			})
+			.catch(error => {
+				reset_survey();
+				console.error('Error:', error);
+			});
+		}
+
+		function reset_survey()
+		{
+			set_rating = 0;
+			question1.style.opacity = '1';
+			question2.style.opacity = '0.3';
+		}
+
+		function thankYou() {
+			question1.style.opacity = 0.0;
+			question2.style.opacity = 0.0;
+			// Create the "Thank You" text element
+			var thankYouText = document.createElement('div');
+			thankYouText.innerHTML = 'TAK';
+			thankYouText.style.position = 'fixed';
+			thankYouText.style.top = '50%';
+			thankYouText.style.left = '50%';
+			thankYouText.style.transform = 'translate(-50%, -50%)';
+			thankYouText.style.fontSize = '20vw';
+			thankYouText.style.color = 'green';
+			thankYouText.style.opacity = '1';
+			thankYouText.style.transition = 'opacity 1s';
+			document.body.appendChild(thankYouText);
+
+			// Fade out the "Thank You" text using the transition
+			setTimeout(function() {
+				thankYouText.style.opacity = '0';
+			}, 0);
+
+			// Remove the "Thank You" text and set question2 opacity after 2 seconds
+			setTimeout(function() {
+				document.body.removeChild(thankYouText);
+				reset_survey();
+			}, 1000);
+		}
+	</script>
+  </body>
+</html>
